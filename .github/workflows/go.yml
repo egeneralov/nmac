@@ -1,0 +1,74 @@
+name: Go
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v1
+
+    - name: Download dependencies
+      run: |
+        export CGO_ENABLED=0
+        export GOARCH=amd64
+        export GO111MODULE=on
+        go mod download
+    
+    - name: Build linux
+      run: |
+        export GOOS=linux && \
+        go build -v -installsuffix cgo -ldflags="-w -s" -o nmac-parse-api-${GOOS}-${GOARCH} cmds/nmac-parse-api/main.go && \
+        go build -v -installsuffix cgo -ldflags="-w -s" -o nmac-parse-page-${GOOS}-${GOARCH} cmds/nmac-parse-page/main.go && \
+        go build -v -installsuffix cgo -ldflags="-w -s" -o nmac-parse-all-${GOOS}-${GOARCH} cmds/nmac-parse-all/main.go
+  
+    - name: Build darwin
+      run: |
+        export GOOS=darwin && \
+        go build -v -installsuffix cgo -ldflags="-w -s" -o nmac-parse-api-${GOOS}-${GOARCH} cmds/nmac-parse-api/main.go && \
+        go build -v -installsuffix cgo -ldflags="-w -s" -o nmac-parse-page-${GOOS}-${GOARCH} cmds/nmac-parse-page/main.go && \
+        go build -v -installsuffix cgo -ldflags="-w -s" -o nmac-parse-all-${GOOS}-${GOARCH} cmds/nmac-parse-all/main.go
+    
+    - name: Upload linux nmac-parse-api artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: linux
+        path: nmac-parse-api-${GOOS}-${GOARCH}
+    
+    - name: Upload linux nmac-parse-page artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: linux
+        path: nmac-parse-page-${GOOS}-${GOARCH}
+    
+    - name: Upload linux nmac-parse-all artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: linux
+        path: nmac-parse-all-${GOOS}-${GOARCH}
+
+    - name: Upload darwin nmac-parse-api artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: darwin
+        path: nmac-parse-api-${GOOS}-${GOARCH}
+    
+    - name: Upload darwin nmac-parse-page artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: darwin
+        path: nmac-parse-page-${GOOS}-${GOARCH}
+    
+    - name: Upload darwin nmac-parse-all artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: darwin
+        path: nmac-parse-all-${GOOS}-${GOARCH}
